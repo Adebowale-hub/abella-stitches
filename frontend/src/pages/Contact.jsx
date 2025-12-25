@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import emailjs from '@emailjs/browser';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import './Contact.css';
@@ -7,9 +8,11 @@ const Contact = () => {
     const [formData, setFormData] = useState({
         name: '',
         email: '',
+        subject: '',
         message: ''
     });
-    const [submitted, setSubmitted] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [status, setStatus] = useState({ type: '', message: '' });
 
     const handleChange = (e) => {
         setFormData({
@@ -18,13 +21,57 @@ const Contact = () => {
         });
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log('Contact form submitted:', formData);
-        setSubmitted(true);
-        setFormData({ name: '', email: '', message: '' });
+        setLoading(true);
+        setStatus({ type: '', message: '' });
 
-        setTimeout(() => setSubmitted(false), 5000);
+        // Validate environment variables
+        const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
+        const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
+        const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
+
+        if (!publicKey || !serviceId || !templateId) {
+            setStatus({
+                type: 'error',
+                message: 'Email service is not configured. Please contact the administrator.'
+            });
+            setLoading(false);
+            return;
+        }
+
+        try {
+            // Send email using EmailJS
+            await emailjs.send(
+                serviceId,
+                templateId,
+                {
+                    from_name: formData.name,
+                    from_email: formData.email,
+                    subject: formData.subject,
+                    message: formData.message,
+                    to_name: 'Abella Stitches Team',
+                },
+                publicKey
+            );
+
+            setStatus({
+                type: 'success',
+                message: '✓ Thank you! Your message has been sent successfully. We\'ll get back to you soon.'
+            });
+            setFormData({ name: '', email: '', subject: '', message: '' });
+
+            // Clear success message after 8 seconds
+            setTimeout(() => setStatus({ type: '', message: '' }), 8000);
+        } catch (error) {
+            console.error('EmailJS Error:', error);
+            setStatus({
+                type: 'error',
+                message: '✗ Failed to send message. Please try again or contact us directly at hello@adirehub.com'
+            });
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -68,6 +115,7 @@ const Contact = () => {
                                         onChange={handleChange}
                                         className="input"
                                         required
+                                        disabled={loading}
                                     />
                                 </div>
 
@@ -81,6 +129,22 @@ const Contact = () => {
                                         onChange={handleChange}
                                         className="input"
                                         required
+                                        disabled={loading}
+                                    />
+                                </div>
+
+                                <div className="form-group">
+                                    <label htmlFor="subject" className="label">Subject</label>
+                                    <input
+                                        type="text"
+                                        id="subject"
+                                        name="subject"
+                                        value={formData.subject}
+                                        onChange={handleChange}
+                                        className="input"
+                                        placeholder="e.g., Product Inquiry, Custom Order, etc."
+                                        required
+                                        disabled={loading}
                                     />
                                 </div>
 
@@ -93,16 +157,21 @@ const Contact = () => {
                                         onChange={handleChange}
                                         className="textarea"
                                         required
+                                        disabled={loading}
                                     />
                                 </div>
 
-                                <button type="submit" className="btn btn-primary btn-large">
-                                    Send Message
+                                <button
+                                    type="submit"
+                                    className="btn btn-primary btn-large"
+                                    disabled={loading}
+                                >
+                                    {loading ? 'Sending...' : 'Send Message'}
                                 </button>
 
-                                {submitted && (
-                                    <p className="success-message">
-                                        ✓ Thank you! Your message has been sent successfully.
+                                {status.message && (
+                                    <p className={`${status.type === 'success' ? 'success-message' : 'error-message'}`}>
+                                        {status.message}
                                     </p>
                                 )}
                             </form>

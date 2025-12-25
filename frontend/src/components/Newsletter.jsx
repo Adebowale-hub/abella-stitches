@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import emailjs from '@emailjs/browser';
 import { newsletterAPI } from '../utils/api';
 import './Newsletter.css';
 
@@ -6,6 +7,33 @@ const Newsletter = () => {
     const [email, setEmail] = useState('');
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState('');
+
+    const sendConfirmationEmail = async (subscriberEmail) => {
+        try {
+            const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
+            const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
+            const templateId = import.meta.env.VITE_EMAILJS_NEWSLETTER_TEMPLATE_ID;
+
+            // If EmailJS is not configured, skip sending confirmation email
+            if (!publicKey || !serviceId || !templateId) {
+                console.warn('EmailJS is not configured for newsletter confirmations');
+                return;
+            }
+
+            await emailjs.send(
+                serviceId,
+                templateId,
+                {
+                    user_email: subscriberEmail,
+                    to_email: subscriberEmail,
+                },
+                publicKey
+            );
+        } catch (error) {
+            // Don't fail the subscription if email sending fails
+            console.error('Failed to send confirmation email:', error);
+        }
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -21,8 +49,13 @@ const Newsletter = () => {
         setMessage('');
 
         try {
+            // Subscribe via backend
             await newsletterAPI.subscribe(email);
-            setMessage('Successfully subscribed! Check your inbox.');
+
+            // Send confirmation email (non-blocking)
+            await sendConfirmationEmail(email);
+
+            setMessage('Successfully subscribed! Check your inbox for confirmation.');
             setEmail('');
         } catch (error) {
             setMessage(error.message || 'Failed to subscribe. Please try again.');

@@ -1,48 +1,22 @@
 import express from 'express';
 import Newsletter from '../models/Newsletter.js';
 import { protect } from '../middleware/auth.js';
+import { subscribeToNewsletter, getNewsletterStats } from '../controllers/newsletterController.js';
 
 const router = express.Router();
 
 // @route   POST /api/newsletter/subscribe
-// @desc    Subscribe to newsletter
+// @desc    Subscribe to newsletter (save to MongoDB)
 // @access  Public
-router.post('/subscribe', async (req, res) => {
-    try {
-        const { email } = req.body;
+router.post('/subscribe', subscribeToNewsletter);
 
-        if (!email) {
-            return res.status(400).json({ message: 'Email is required' });
-        }
-
-        // Check if email already exists
-        const existingSubscriber = await Newsletter.findOne({ email });
-        if (existingSubscriber) {
-            if (existingSubscriber.isActive) {
-                return res.status(400).json({ message: 'Email is already subscribed' });
-            } else {
-                // Reactivate subscription
-                existingSubscriber.isActive = true;
-                existingSubscriber.subscribedAt = Date.now();
-                await existingSubscriber.save();
-                return res.json({ message: 'Successfully resubscribed!' });
-            }
-        }
-
-        // Create new subscriber
-        await Newsletter.create({ email });
-        res.status(201).json({ message: 'Successfully subscribed!' });
-    } catch (error) {
-        console.error('Newsletter subscription error:', error);
-        if (error.code === 11000) {
-            return res.status(400).json({ message: 'Email is already subscribed' });
-        }
-        res.status(500).json({ message: 'Failed to subscribe. Please try again.' });
-    }
-});
+// @route   GET /api/newsletter/stats
+// @desc    Get newsletter statistics from Mailchimp
+// @access  Private (Admin only)
+router.get('/stats', protect, getNewsletterStats);
 
 // @route   GET /api/newsletter
-// @desc    Get all subscribers
+// @desc    Get all subscribers from MongoDB (backup)
 // @access  Private (Admin only)
 router.get('/', protect, async (req, res) => {
     try {
@@ -55,7 +29,7 @@ router.get('/', protect, async (req, res) => {
 });
 
 // @route   DELETE /api/newsletter/:email
-// @desc    Unsubscribe from newsletter
+// @desc    Mark subscriber as inactive in MongoDB
 // @access  Private (Admin only)
 router.delete('/:email', protect, async (req, res) => {
     try {
@@ -67,7 +41,7 @@ router.delete('/:email', protect, async (req, res) => {
 
         subscriber.isActive = false;
         await subscriber.save();
-        res.json({ message: 'Successfully unsubscribed' });
+        res.json({ message: 'Successfully unsubscribed from local database' });
     } catch (error) {
         console.error('Error unsubscribing:', error);
         res.status(500).json({ message: 'Server error', error: error.message });
