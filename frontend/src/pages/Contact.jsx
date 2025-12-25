@@ -51,6 +51,7 @@ const Contact = () => {
                     subject: formData.subject,
                     message: formData.message,
                     to_name: 'Abella Stitches Team',
+                    to_email: 'abellastitches@gmail.com', // Your business email
                 },
                 publicKey
             );
@@ -90,15 +91,15 @@ const Contact = () => {
                             <div className="contact-info">
                                 <div className="contact-info-item">
                                     <h3>📧 Email</h3>
-                                    <p>hello@adirehub.com</p>
+                                    <p>abellastitches@gmail.com</p>
                                 </div>
                                 <div className="contact-info-item">
                                     <h3>📞 Phone</h3>
-                                    <p>+234 800 123 4567</p>
+                                    <p>+234 803 201 3017</p>
                                 </div>
                                 <div className="contact-info-item">
                                     <h3>📍 Location</h3>
-                                    <p>Lagos, Nigeria</p>
+                                    <p>Ogun, Nigeria</p>
                                 </div>
                             </div>
                         </div>
