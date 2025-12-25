@@ -11,10 +11,11 @@ const Header = () => {
             <div className="container">
                 <div className="header-content">
                     <Link to="/" className="header-logo">
-                        <div className="logo-circle">
-                            <span>AS</span>
-                        </div>
-                        <span className="brand-name">Abella Stitches</span>
+                        <img
+                            src="/logo.png"
+                            alt="Abella Stitches"
+                            style={{ height: '40px', width: 'auto' }}
+                        />
                     </Link>
 
                     <nav className="header-nav">

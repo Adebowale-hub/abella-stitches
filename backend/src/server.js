@@ -7,6 +7,7 @@ import adminRoutes from './routes/admin.js';
 import productRoutes from './routes/products.js';
 import newsletterRoutes from './routes/newsletter.js';
 import paymentRoutes from './routes/payment.js';
+import orderRoutes from './routes/orders.js';
 
 // Load environment variables
 dotenv.config();
@@ -36,6 +37,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/newsletter', newsletterRoutes);
 app.use('/api/payment', paymentRoutes);
+app.use('/api/orders', orderRoutes);
 
 // Root route
 app.get('/', (req, res) => {

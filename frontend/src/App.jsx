@@ -10,6 +10,7 @@ import PaymentSuccess from './pages/PaymentSuccess';
 import PaymentCancel from './pages/PaymentCancel';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
+import AdminOrders from './pages/admin/Orders';
 
 function App() {
     return (
@@ -30,6 +31,14 @@ function App() {
                             element={
                                 <ProtectedRoute>
                                     <AdminDashboard />
+                                </ProtectedRoute>
+                            }
+                        />
+                        <Route
+                            path="/admin/orders"
+                            element={
+                                <ProtectedRoute>
+                                    <AdminOrders />
                                 </ProtectedRoute>
                             }
                         />

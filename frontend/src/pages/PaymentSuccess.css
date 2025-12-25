@@ -61,6 +61,38 @@
     margin-bottom: 2rem;
 }
 
+.payment-details {
+    background: rgba(76, 175, 80, 0.1);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+    text-align: left;
+}
+
+.payment-details p {
+    margin: 0.5rem 0;
+    font-size: 1rem;
+    color: var(--neutral-gray);
+}
+
+.payment-details strong {
+    color: var(--neutral-black);
+    margin-right: 0.5rem;
+}
+
+.loading-spinner {
+    font-size: 1.25rem;
+    color: var(--neutral-gray);
+    padding: 3rem;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+
 .result-actions {
     display: flex;
     justify-content: center;

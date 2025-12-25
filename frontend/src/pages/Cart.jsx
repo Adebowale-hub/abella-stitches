@@ -16,27 +16,41 @@ const Cart = () => {
         }
 
         try {
-            // Create Stripe checkout session with all cart items
+            // Prompt for email (required by Paystack)
+            const email = prompt('Please enter your email address for payment:');
+            if (!email) {
+                return;
+            }
+
+            // Validate email format
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                alert('Please enter a valid email address.');
+                return;
+            }
+
+            // Create Paystack payment with all cart items
             const totalAmount = getCartTotal();
             const productNames = cartItems.map(item => `${item.productName} (x${item.quantity})`).join(', ');
 
-            const response = await paymentAPI.createCheckoutSession({
+            const response = await paymentAPI.initializePayment({
+                email,
+                amount: totalAmount,
                 productId: 'cart_checkout',
-                productName: `Cart: ${productNames}`,
-                price: totalAmount,
-                imageUrl: cartItems[0]?.imageUrl || ''
+                productName: `Cart: ${productNames}`
             });
 
-            if (response.url) {
+            // Redirect to Paystack checkout page
+            if (response.status && response.data.authorization_url) {
                 // Clear cart after successful checkout session creation
                 clearCart();
-                window.location.href = response.url;
+                window.location.href = response.data.authorization_url;
             } else {
-                alert('Payment gateway not yet configured. Please add Stripe API keys to enable checkout.');
+                alert('Failed to initialize payment. Please try again.');
             }
         } catch (error) {
             console.error('Checkout error:', error);
-            alert('Failed to initiate checkout. Please try again.');
+            alert(error.message || 'Failed to initiate checkout. Please try again.');
         }
     };
 

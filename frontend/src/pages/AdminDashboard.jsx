@@ -134,14 +134,20 @@ const AdminDashboard = () => {
                 <div className="container">
                     <div className="admin-header-content">
                         <div className="admin-logo">
-                            <div className="logo-circle">
-                                <span>AH</span>
-                            </div>
-                            <span className="brand-name">AdireHub Fashion</span>
+                            <img
+                                src="/logo.png"
+                                alt="Abella Stitches"
+                                style={{ height: '35px', width: 'auto' }}
+                            />
                         </div>
-                        <button onClick={handleLogout} className="btn btn-outline btn-small">
-                            Exit Admin
-                        </button>
+                        <div style={{ display: 'flex', gap: '1rem' }}>
+                            <button onClick={() => navigate('/admin/orders')} className="btn btn-secondary btn-small">
+                                View Orders
+                            </button>
+                            <button onClick={handleLogout} className="btn btn-outline btn-small">
+                                Exit Admin
+                            </button>
+                        </div>
                     </div>
                 </div>
             </header>

@@ -91,12 +91,40 @@ export const newsletterAPI = {
     }
 };
 
-// Payment API (Stripe)
+// Payment API (Paystack)
 export const paymentAPI = {
-    createCheckoutSession: async (productData) => {
-        return fetchAPI('/payment/create-checkout-session', {
+    initializePayment: async (paymentData) => {
+        return fetchAPI('/payment/initialize', {
             method: 'POST',
-            body: JSON.stringify(productData)
+            body: JSON.stringify(paymentData)
+        });
+    },
+
+    verifyPayment: async (reference) => {
+        return fetchAPI(`/payment/verify/${reference}`);
+    }
+};
+
+// Orders API
+export const ordersAPI = {
+    getAll: async (filters = {}) => {
+        const queryParams = new URLSearchParams(filters).toString();
+        return fetchAPI(`/orders${queryParams ? `?${queryParams}` : ''}`);
+    },
+
+    getStats: async () => {
+        return fetchAPI('/orders/stats');
+    },
+
+    getById: async (id) => {
+        return fetchAPI(`/orders/${id}`);
+    },
+
+    updateStatus: async (id, statusData) => {
+        return fetchAPI(`/orders/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(statusData)
         });
     }
 };
+

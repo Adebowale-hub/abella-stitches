@@ -48,23 +48,38 @@ const ProductDetails = () => {
 
         try {
             setCheckoutLoading(true);
-            const response = await paymentAPI.createCheckoutSession({
+
+            // Prompt for email (required by Paystack)
+            const email = prompt('Please enter your email address for payment:');
+            if (!email) {
+                setCheckoutLoading(false);
+                return;
+            }
+
+            // Validate email format
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                alert('Please enter a valid email address.');
+                setCheckoutLoading(false);
+                return;
+            }
+
+            const response = await paymentAPI.initializePayment({
+                email,
+                amount: product.price,
                 productId: product._id,
-                productName: product.productName,
-                price: product.price,
-                imageUrl: product.imageUrl
+                productName: product.productName
             });
 
-            // If Stripe is configured, redirect to checkout
-            if (response.url) {
-                window.location.href = response.url;
+            // Redirect to Paystack checkout page
+            if (response.status && response.data.authorization_url) {
+                window.location.href = response.data.authorization_url;
             } else {
-                // Mock response - show alert
-                alert('Payment gateway not yet configured. Please add Stripe API keys to enable checkout.');
+                alert('Failed to initialize payment. Please try again.');
             }
         } catch (error) {
             console.error('Checkout error:', error);
-            alert('Failed to initiate checkout. Please try again.');
+            alert(error.message || 'Failed to initiate checkout. Please try again.');
         } finally {
             setCheckoutLoading(false);
         }
