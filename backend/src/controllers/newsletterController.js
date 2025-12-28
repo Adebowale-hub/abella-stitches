@@ -53,26 +53,20 @@ export const subscribeToNewsletter = async (req, res) => {
     }
 };
 
-// @desc    Get newsletter statistics (Admin only)
+// @desc    Get newsletter statistics from MongoDB (Admin only)
 // @access  Private
 export const getNewsletterStats = async (req, res) => {
     try {
-        const mailchimpClient = initializeMailchimp();
-        if (!mailchimpClient) {
-            return res.status(500).json({
-                message: 'Newsletter service is not configured.'
-            });
-        }
-
-        const audienceId = process.env.MAILCHIMP_AUDIENCE_ID;
-
-        const stats = await mailchimpClient.lists.getList(audienceId);
+        // Get stats from MongoDB
+        const totalSubscribers = await Newsletter.countDocuments({ isActive: true });
+        const totalUnsubscribed = await Newsletter.countDocuments({ isActive: false });
+        const allTimeTotal = await Newsletter.countDocuments({});
 
         res.json({
-            totalSubscribers: stats.stats.member_count,
-            totalUnsubscribed: stats.stats.unsubscribe_count,
-            totalCleaned: stats.stats.cleaned_count,
-            subscribedCount: stats.stats.member_count - stats.stats.unsubscribe_count - stats.stats.cleaned_count
+            totalSubscribers,
+            totalUnsubscribed,
+            allTimeTotal,
+            subscribedCount: totalSubscribers
         });
 
     } catch (error) {
