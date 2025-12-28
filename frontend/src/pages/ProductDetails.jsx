@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import CheckoutModal from '../components/CheckoutModal';
 import { productsAPI, paymentAPI } from '../utils/api';
 import { useCart } from '../contexts/CartContext';
 import './ProductDetails.css';
@@ -15,6 +16,8 @@ const ProductDetails = () => {
     const [checkoutLoading, setCheckoutLoading] = useState(false);
     const [showAddedMessage, setShowAddedMessage] = useState(false);
     const [error, setError] = useState(null);
+
+    const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
 
     useEffect(() => {
         fetchProduct();
@@ -43,32 +46,22 @@ const ProductDetails = () => {
         setTimeout(() => setShowAddedMessage(false), 2000);
     };
 
-    const handleBuyNow = async () => {
+    const handleBuyNowClick = () => {
         if (!product) return;
+        setIsCheckoutModalOpen(true);
+    };
 
+    const handlePaymentSubmission = async (formData) => {
         try {
             setCheckoutLoading(true);
-
-            // Prompt for email (required by Paystack)
-            const email = prompt('Please enter your email address for payment:');
-            if (!email) {
-                setCheckoutLoading(false);
-                return;
-            }
-
-            // Validate email format
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(email)) {
-                alert('Please enter a valid email address.');
-                setCheckoutLoading(false);
-                return;
-            }
+            const { email, ...shippingAddress } = formData;
 
             const response = await paymentAPI.initializePayment({
                 email,
                 amount: product.price,
                 productId: product._id,
-                productName: product.productName
+                productName: product.productName,
+                shippingAddress
             });
 
             // Redirect to Paystack checkout page
@@ -76,11 +69,11 @@ const ProductDetails = () => {
                 window.location.href = response.data.authorization_url;
             } else {
                 alert('Failed to initialize payment. Please try again.');
+                setCheckoutLoading(false);
             }
         } catch (error) {
             console.error('Checkout error:', error);
             alert(error.message || 'Failed to initiate checkout. Please try again.');
-        } finally {
             setCheckoutLoading(false);
         }
     };
@@ -151,11 +144,11 @@ const ProductDetails = () => {
                                     Add to Cart
                                 </button>
                                 <button
-                                    onClick={handleBuyNow}
+                                    onClick={handleBuyNowClick}
                                     className="btn btn-primary btn-large"
                                     disabled={checkoutLoading}
                                 >
-                                    {checkoutLoading ? 'Processing...' : 'Buy Now'}
+                                    Buy Now
                                 </button>
                             </div>
 
@@ -190,6 +183,15 @@ const ProductDetails = () => {
                     </div>
                 </div>
             </main>
+
+            <CheckoutModal
+                isOpen={isCheckoutModalOpen}
+                onClose={() => setIsCheckoutModalOpen(false)}
+                onSubmit={handlePaymentSubmission}
+                totalAmount={product.price}
+                loading={checkoutLoading}
+            />
+
             <Footer />
         </div>
     );

@@ -9,6 +9,17 @@ const orderSchema = new mongoose.Schema({
         lowercase: true
     },
 
+    // Shipping Information
+    shippingAddress: {
+        fullName: { type: String, required: true },
+        address: { type: String, required: true },
+        city: { type: String, required: true },
+        state: { type: String, required: true },
+        zipCode: String,
+        country: { type: String, default: 'Nigeria' },
+        phone: { type: String, required: true }
+    },
+
     // Order Items
     items: [{
         productId: {

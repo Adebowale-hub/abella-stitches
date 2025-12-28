@@ -1,7 +1,9 @@
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import CheckoutModal from '../components/CheckoutModal';
 import { paymentAPI } from '../utils/api';
 import './Cart.css';
 
@@ -9,25 +11,21 @@ const Cart = () => {
     const navigate = useNavigate();
     const { cartItems, removeFromCart, updateQuantity, getCartTotal, clearCart } = useCart();
 
-    const handleCheckout = async () => {
+    const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
+    const [isProcessing, setIsProcessing] = useState(false);
+
+    const handleCheckoutClick = () => {
         if (cartItems.length === 0) {
             alert('Your cart is empty!');
             return;
         }
+        setIsCheckoutModalOpen(true);
+    };
 
+    const handlePaymentSubmission = async (formData) => {
         try {
-            // Prompt for email (required by Paystack)
-            const email = prompt('Please enter your email address for payment:');
-            if (!email) {
-                return;
-            }
-
-            // Validate email format
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(email)) {
-                alert('Please enter a valid email address.');
-                return;
-            }
+            setIsProcessing(true);
+            const { email, ...shippingAddress } = formData;
 
             // Create Paystack payment with all cart items
             const totalAmount = getCartTotal();
@@ -37,7 +35,8 @@ const Cart = () => {
                 email,
                 amount: totalAmount,
                 productId: 'cart_checkout',
-                productName: `Cart: ${productNames}`
+                productName: `Cart: ${productNames}`,
+                shippingAddress
             });
 
             // Redirect to Paystack checkout page
@@ -47,10 +46,12 @@ const Cart = () => {
                 window.location.href = response.data.authorization_url;
             } else {
                 alert('Failed to initialize payment. Please try again.');
+                setIsProcessing(false);
             }
         } catch (error) {
             console.error('Checkout error:', error);
             alert(error.message || 'Failed to initiate checkout. Please try again.');
+            setIsProcessing(false);
         }
     };
 
@@ -149,7 +150,7 @@ const Cart = () => {
                                 <span>₦{getCartTotal().toLocaleString('en-NG')}</span>
                             </div>
 
-                            <button onClick={handleCheckout} className="btn btn-primary btn-large checkout-btn">
+                            <button onClick={handleCheckoutClick} className="btn btn-primary btn-large checkout-btn">
                                 Proceed to Checkout
                             </button>
 
@@ -160,6 +161,15 @@ const Cart = () => {
                     </div>
                 </div>
             </main>
+
+            <CheckoutModal
+                isOpen={isCheckoutModalOpen}
+                onClose={() => setIsCheckoutModalOpen(false)}
+                onSubmit={handlePaymentSubmission}
+                totalAmount={getCartTotal()}
+                loading={isProcessing}
+            />
+
             <Footer />
         </div>
     );

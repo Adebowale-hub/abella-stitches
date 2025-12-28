@@ -51,9 +51,9 @@ const paystackRequest = (path, method, data = null) => {
 // @access  Public
 router.post('/initialize', async (req, res) => {
     try {
-        const { email, amount, productId, productName } = req.body;
+        const { email, amount, productId, productName, shippingAddress } = req.body;
 
-        if (!email || !amount || !productId || !productName) {
+        if (!email || !amount || !productId || !productName || !shippingAddress) {
             return res.status(400).json({ message: 'Missing required fields' });
         }
 
@@ -73,7 +73,8 @@ router.post('/initialize', async (req, res) => {
                         variable_name: 'product_name',
                         value: productName
                     }
-                ]
+                ],
+                shippingAddress: JSON.stringify(shippingAddress)
             },
             callback_url: `${process.env.FRONTEND_URL}/payment/success`
         };
@@ -132,6 +133,23 @@ router.get('/verify/:reference', async (req, res) => {
                 const metadata = response.data.metadata || {};
                 const customerEmail = response.data.customer.email;
 
+                // Parse shipping address
+                let shippingAddress = {};
+                try {
+                    shippingAddress = JSON.parse(metadata.shippingAddress);
+                } catch (e) {
+                    console.error('Failed to parse shipping address:', e);
+                    // Fallback or partial address if needed, but required by schema
+                    shippingAddress = {
+                        fullName: 'Unknown',
+                        address: 'Unknown',
+                        city: 'Unknown',
+                        state: 'Unknown',
+                        country: 'Nigeria',
+                        phone: '0000000000'
+                    };
+                }
+
                 // Parse product information from metadata
                 let orderItems = [];
 
@@ -156,6 +174,8 @@ router.get('/verify/:reference', async (req, res) => {
                 // Create order
                 const order = await Order.create({
                     customerEmail,
+                    shippingAddress,
+                    items: orderItems,
                     items: orderItems,
                     totalAmount: response.data.amount / 100,
                     paymentReference: reference,

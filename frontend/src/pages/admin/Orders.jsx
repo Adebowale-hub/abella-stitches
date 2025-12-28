@@ -187,6 +187,20 @@ const Orders = () => {
                                 <div className="info-row">
                                     <strong>Payment Status:</strong> {selectedOrder.paymentStatus}
                                 </div>
+                                <div className="info-row" style={{ marginTop: '1rem', borderTop: '1px solid #eee', paddingTop: '1rem' }}>
+                                    <strong>Shipping Address:</strong>
+                                    {selectedOrder.shippingAddress ? (
+                                        <div style={{ marginLeft: '1rem', marginTop: '0.5rem', fontSize: '0.9rem', color: '#555' }}>
+                                            <div>{selectedOrder.shippingAddress.fullName}</div>
+                                            <div>{selectedOrder.shippingAddress.address}</div>
+                                            <div>{selectedOrder.shippingAddress.city}, {selectedOrder.shippingAddress.state} {selectedOrder.shippingAddress.zipCode}</div>
+                                            <div>{selectedOrder.shippingAddress.country}</div>
+                                            <div style={{ marginTop: '0.5rem' }}>📞 {selectedOrder.shippingAddress.phone}</div>
+                                        </div>
+                                    ) : (
+                                        <span style={{ marginLeft: '0.5rem', color: '#999' }}>No address provided</span>
+                                    )}
+                                </div>
                             </div>
 
                             <h3>Order Items</h3>
