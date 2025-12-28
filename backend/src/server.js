@@ -12,6 +12,24 @@ import orderRoutes from './routes/orders.js';
 // Load environment variables
 dotenv.config();
 
+// Validate critical environment variables
+const requiredEnvVars = [
+    'MONGODB_URI',
+    'JWT_SECRET',
+    'PAYSTACK_SECRET_KEY',  // Using Paystack, not Stripe
+    'SMTP_HOST',
+    'SMTP_USER',
+    'SMTP_PASS'
+];
+
+const missing = requiredEnvVars.filter(key => !process.env[key]);
+if (missing.length > 0) {
+    console.error('❌ Missing required environment variables:');
+    missing.forEach(key => console.error(`   - ${key}`));
+    console.error('\n💡 Please check your .env file against .env.example');
+    process.exit(1);
+}
+
 // Connect to database
 connectDB();
 
@@ -24,11 +42,13 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // CORS configuration
+const allowedOrigins = [
+    process.env.FRONTEND_URL || 'http://localhost:5173',
+    'http://localhost:5173' // Always allow local dev
+].filter((origin, index, self) => self.indexOf(origin) === index); // Remove duplicates
+
 app.use(cors({
-    origin: [
-        'http://localhost:5173', // Vite dev server
-        'https://abella-stitches.vercel.app' // Production frontend
-    ],
+    origin: allowedOrigins,
     credentials: true
 }));
 

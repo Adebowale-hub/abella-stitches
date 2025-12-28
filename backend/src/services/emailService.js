@@ -6,15 +6,28 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Check if email service is properly configured
+const isConfigured = () => {
+    const required = ['SMTP_HOST', 'SMTP_PORT', 'SMTP_USER', 'SMTP_PASS'];
+    const missing = required.filter(key => !process.env[key]);
+
+    if (missing.length > 0) {
+        console.warn('⚠️  Email service not fully configured. Missing environment variables:', missing.join(', '));
+        console.warn('   Order confirmation emails will not be sent.');
+        return false;
+    }
+    return true;
+};
+
 // Create reusable transporter
 const createTransporter = () => {
-    return nodemailer.createTransport({
-        host: 'smtp.gmail.com',
-        port: 587,
+    return nodemailer.createTransporter({
+        host: process.env.SMTP_HOST,
+        port: parseInt(process.env.SMTP_PORT) || 587,
         secure: false, // Use STARTTLS
         auth: {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASSWORD
+            user: process.env.SMTP_USER,
+            pass: process.env.SMTP_PASS
         }
     });
 };
@@ -37,6 +50,12 @@ const loadTemplate = (templateName, variables) => {
  * Send order confirmation email
  */
 export const sendOrderConfirmationEmail = async (orderData) => {
+    // Check if SMTP is configured
+    if (!isConfigured()) {
+        console.error('❌ Cannot send order confirmation: SMTP not configured');
+        return { success: false, error: 'Email service not configured' };
+    }
+
     try {
         const {
             customerEmail,
@@ -73,7 +92,7 @@ export const sendOrderConfirmationEmail = async (orderData) => {
         // Send email
         const transporter = createTransporter();
         const info = await transporter.sendMail({
-            from: `"Abella Stitches" <${process.env.EMAIL_USER}>`,
+            from: process.env.SMTP_FROM || `"Abella Stitches" <${process.env.SMTP_USER}>`,
             to: customerEmail,
             subject: `Order Confirmation - ${orderNumber}`,
             html: html,
@@ -97,6 +116,12 @@ export const sendOrderConfirmationEmail = async (orderData) => {
  * Send order status update email
  */
 export const sendOrderStatusEmail = async (orderData, newStatus) => {
+    // Check if SMTP is configured
+    if (!isConfigured()) {
+        console.error('❌ Cannot send status update: SMTP not configured');
+        return { success: false, error: 'Email service not configured' };
+    }
+
     try {
         const { customerEmail, orderNumber } = orderData;
 
@@ -122,7 +147,7 @@ export const sendOrderStatusEmail = async (orderData, newStatus) => {
         // Send email
         const transporter = createTransporter();
         const info = await transporter.sendMail({
-            from: `"Abella Stitches" <${process.env.EMAIL_USER}>`,
+            from: process.env.SMTP_FROM || `"Abella Stitches" <${process.env.SMTP_USER}>`,
             to: customerEmail,
             subject: `Order Update - ${orderNumber}`,
             html: html,

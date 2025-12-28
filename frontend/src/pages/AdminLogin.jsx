@@ -83,7 +83,7 @@ const AdminLogin = () => {
                     </form>
 
                     <div className="login-footer">
-                        <p>Default credentials: admin@adirehub.com / Admin123!</p>
+                        <p>Default credentials: abellastitches@gmail.com / Matthew7:7</p>
                     </div>
                 </div>
             </div>
