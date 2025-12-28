@@ -72,7 +72,7 @@ const Orders = () => {
         <div className="orders-page">
             <div className="orders-header">
                 <h1>Orders Management</h1>
-                <button onClick={() => navigate('/admin')} className="btn btn-outline">
+                <button onClick={() => navigate('/admin/dashboard')} className="btn btn-outline">
                     Back to Dashboard
                 </button>
             </div>
