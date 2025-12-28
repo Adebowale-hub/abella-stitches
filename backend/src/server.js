@@ -41,16 +41,36 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// CORS configuration
+// CORS configuration - Enhanced for Vercel serverless
 const allowedOrigins = [
     process.env.FRONTEND_URL || 'http://localhost:5173',
-    'http://localhost:5173' // Always allow local dev
+    'http://localhost:5173', // Always allow local dev
+    'https://abella-stitches.vercel.app' // Production frontend
 ].filter((origin, index, self) => self.indexOf(origin) === index); // Remove duplicates
 
-app.use(cors({
-    origin: allowedOrigins,
-    credentials: true
-}));
+const corsOptions = {
+    origin: function (origin, callback) {
+        // Allow requests with no origin (like mobile apps, Postman, etc.)
+        if (!origin) return callback(null, true);
+
+        if (allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            console.log('CORS blocked origin:', origin);
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
+    exposedHeaders: ['Set-Cookie'],
+    maxAge: 86400 // 24 hours
+};
+
+app.use(cors(corsOptions));
+
+// Handle preflight requests explicitly
+app.options('*', cors(corsOptions));
 
 // Routes
 app.use('/api/admin', adminRoutes);
