@@ -70,8 +70,15 @@ app.use((err, req, res, next) => {
     res.status(500).json({ message: 'Something went wrong!', error: err.message });
 });
 
-// Start server
+// Start server (only when not in Vercel serverless environment)
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
+
+// Only start listening if not in production or not on Vercel
+if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+    app.listen(PORT, () => {
+        console.log(`Server running on port ${PORT}`);
+    });
+}
+
+// Export for Vercel serverless functions
+export default app;

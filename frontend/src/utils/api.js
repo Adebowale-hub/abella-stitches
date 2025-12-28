@@ -1,4 +1,6 @@
-// Use environment variable in production, fallback to proxy in development
+// Use environment variable in production, fallback to relative path for Vercel
+// For Vercel deployment (both frontend and backend on same domain), use '/api'
+// For separate deployments, set VITE_API_URL to your backend URL
 const API_BASE = import.meta.env.VITE_API_URL
     ? `${import.meta.env.VITE_API_URL}/api`
     : '/api';
