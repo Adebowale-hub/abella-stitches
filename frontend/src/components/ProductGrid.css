@@ -62,8 +62,8 @@
 
 @media (max-width: 640px) {
     .product-grid {
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
     }
 
     .catalog-panel {
@@ -73,4 +73,31 @@
     .product-grid-section {
         padding: 2rem 0;
     }
+}
+
+/* View All Button */
+.view-all-container {
+    text-align: center;
+    margin-top: 2.5rem;
+}
+
+.view-all-btn {
+    display: inline-block;
+    padding: 1rem 2.5rem;
+    background: white;
+    color: var(--primary-teal);
+    border: 2px solid white;
+    border-radius: var(--radius-full);
+    font-weight: 700;
+    font-size: 1.1rem;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.view-all-btn:hover {
+    background: linear-gradient(135deg, #0d9488 0%, #047857 100%);
+    color: white;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
 }

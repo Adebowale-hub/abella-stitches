@@ -18,19 +18,62 @@ router.get('/categories/unique', async (req, res) => {
 });
 
 // @route   GET /api/products
-// @desc    Get all products (with optional category filter)
+// @desc    Get all products (with optional filters, search, sorting, pagination)
 // @access  Public
 router.get('/', async (req, res) => {
     try {
-        const { category } = req.query;
+        const { category, search, minPrice, maxPrice, sort, page = 1, limit = 100 } = req.query;
 
+        // Build query
         let query = {};
+
+        // Category filter
         if (category && category !== 'All') {
             query.category = category;
         }
 
-        const products = await Product.find(query).sort({ createdAt: -1 });
-        res.json(products);
+        // Search by product name (case-insensitive)
+        if (search) {
+            query.productName = { $regex: search, $options: 'i' };
+        }
+
+        // Price range filter
+        if (minPrice || maxPrice) {
+            query.price = {};
+            if (minPrice) query.price.$gte = Number(minPrice);
+            if (maxPrice) query.price.$lte = Number(maxPrice);
+        }
+
+        // Determine sort order
+        let sortOption = { createdAt: -1 }; // Default: newest first
+        if (sort === 'price-asc') sortOption = { price: 1 };
+        else if (sort === 'price-desc') sortOption = { price: -1 };
+        else if (sort === 'name-asc') sortOption = { productName: 1 };
+        else if (sort === 'newest') sortOption = { createdAt: -1 };
+
+        // Calculate pagination
+        const pageNum = parseInt(page);
+        const limitNum = parseInt(limit);
+        const skip = (pageNum - 1) * limitNum;
+
+        // Execute query with pagination
+        const products = await Product.find(query)
+            .sort(sortOption)
+            .limit(limitNum)
+            .skip(skip);
+
+        // Get total count for pagination metadata
+        const total = await Product.countDocuments(query);
+
+        res.json({
+            products,
+            pagination: {
+                total,
+                page: pageNum,
+                pages: Math.ceil(total / limitNum),
+                limit: limitNum
+            }
+        });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Server error', error: error.message });

@@ -1,7 +1,8 @@
+import { Link } from 'react-router-dom';
 import ProductCard from './ProductCard';
 import './ProductGrid.css';
 
-const ProductGrid = ({ products, loading }) => {
+const ProductGrid = ({ products, loading, showViewAll = false }) => {
     if (loading) {
         return (
             <section className="product-grid-section" id="catalog">
@@ -35,6 +36,13 @@ const ProductGrid = ({ products, loading }) => {
                             <ProductCard key={product._id} product={product} />
                         ))}
                     </div>
+                    {showViewAll && (
+                        <div className="view-all-container">
+                            <Link to="/shop" className="view-all-btn">
+                                Shop All Products
+                            </Link>
+                        </div>
+                    )}
                 </div>
             </div>
         </section>

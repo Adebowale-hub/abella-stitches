@@ -49,9 +49,18 @@ export const adminAPI = {
 
 // Products API
 export const productsAPI = {
-    getAll: async (category = null) => {
-        const query = category && category !== 'All' ? `?category=${category}` : '';
-        return fetchAPI(`/products${query}`);
+    getAll: async (params = {}) => {
+        const queryParams = new URLSearchParams();
+
+        // Add each parameter if it exists
+        Object.keys(params).forEach(key => {
+            if (params[key] !== null && params[key] !== undefined && params[key] !== '') {
+                queryParams.append(key, params[key]);
+            }
+        });
+
+        const queryString = queryParams.toString();
+        return fetchAPI(`/products${queryString ? `?${queryString}` : ''}`);
     },
 
     getById: async (id) => {

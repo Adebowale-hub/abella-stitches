@@ -24,8 +24,16 @@ const Home = () => {
     const fetchProducts = async () => {
         try {
             setLoading(true);
-            const data = await productsAPI.getAll();
-            setProducts(data);
+            // Fetch only 8 featured/newest products for home page
+            const data = await productsAPI.getAll({ limit: 8, sort: 'newest' });
+
+            // Handle new API response format
+            if (data.products) {
+                setProducts(data.products);
+            } else {
+                // Old format - just array of products
+                setProducts(data.slice(0, 8));
+            }
         } catch (error) {
             console.error('Error fetching products:', error);
         } finally {
@@ -53,7 +61,7 @@ const Home = () => {
                 activeCategory={activeCategory}
                 onCategoryChange={handleCategoryChange}
             />
-            <ProductGrid products={filteredProducts} loading={loading} />
+            <ProductGrid products={filteredProducts} loading={loading} showViewAll={true} />
             <Newsletter />
             <Footer />
         </div>
