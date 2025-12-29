@@ -31,7 +31,7 @@ const Footer = () => {
                         <h4 className="footer-heading">Connect With Us</h4>
                         <div className="social-links">
                             <a
-                                href="https://instagram.com/mojibolaadebowale"
+                                href="https://www.instagram.com/mojibolaatunrase?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="social-link"
