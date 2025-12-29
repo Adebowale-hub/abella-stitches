@@ -42,7 +42,7 @@ const Footer = () => {
                                 </svg>
                             </a>
                             <a
-                                href="https://facebook.com/mojibolaadebowale"
+                                href="https://web.facebook.com/mojibola.atunrase"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="social-link"
