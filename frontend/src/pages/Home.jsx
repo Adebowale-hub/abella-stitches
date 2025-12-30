@@ -29,13 +29,18 @@ const Home = () => {
 
             // Handle new API response format
             if (data.products) {
-                setProducts(data.products);
-            } else {
+                setProducts(Array.isArray(data.products) ? data.products : []);
+            } else if (Array.isArray(data)) {
                 // Old format - just array of products
                 setProducts(data.slice(0, 8));
+            } else {
+                // Unexpected format
+                console.warn('Unexpected API response format:', data);
+                setProducts([]);
             }
         } catch (error) {
             console.error('Error fetching products:', error);
+            setProducts([]); // Fallback to empty array on error
         } finally {
             setLoading(false);
         }

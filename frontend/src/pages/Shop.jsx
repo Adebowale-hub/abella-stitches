@@ -47,9 +47,11 @@ const Shop = () => {
     const fetchCategories = async () => {
         try {
             const data = await productsAPI.getCategories();
-            setCategories(data);
+            // Ensure data is always an array
+            setCategories(Array.isArray(data) ? data : []);
         } catch (error) {
             console.error('Error fetching categories:', error);
+            setCategories([]); // Fallback to empty array on error
         }
     };
 
@@ -73,12 +75,12 @@ const Shop = () => {
 
             // Handle both old and new API response formats
             if (data.products) {
-                setProducts(data.products);
+                setProducts(Array.isArray(data.products) ? data.products : []);
                 setPagination(prev => ({
                     ...prev,
                     ...data.pagination
                 }));
-            } else {
+            } else if (Array.isArray(data)) {
                 // Old format - just array of products
                 setProducts(data);
                 setPagination(prev => ({
@@ -86,9 +88,14 @@ const Shop = () => {
                     total: data.length,
                     pages: 1
                 }));
+            } else {
+                // Unexpected format - fallback to empty array
+                console.warn('Unexpected API response format:', data);
+                setProducts([]);
             }
         } catch (error) {
             console.error('Error fetching products:', error);
+            setProducts([]); // Fallback to empty array on error
         } finally {
             setLoading(false);
         }

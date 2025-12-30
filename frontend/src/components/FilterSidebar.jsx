@@ -101,7 +101,7 @@ const FilterSidebar = ({
             <div className="filter-group">
                 <label className="filter-label">Category</label>
                 <div className="filter-options">
-                    {['All', ...categories].map((cat) => (
+                    {['All', ...(Array.isArray(categories) ? categories : [])].map((cat) => (
                         <button
                             key={cat}
                             className={`filter-chip ${localFilters.category === cat ? 'active' : ''}`}
