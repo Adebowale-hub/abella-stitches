@@ -32,9 +32,22 @@ const AdminDashboard = () => {
         try {
             setLoading(true);
             const data = await productsAPI.getAll();
-            setProducts(data);
+
+            // Handle new API response format
+            if (data.products) {
+                setProducts(Array.isArray(data.products) ? data.products : []);
+            } else if (Array.isArray(data)) {
+                // Old format - just array of products
+                setProducts(data);
+            } else {
+                // Unexpected format
+                console.warn('Unexpected API response format:', data);
+                setProducts([]);
+            }
         } catch (error) {
+            console.error('Error fetching products:', error);
             showToast('Error fetching products', 'error');
+            setProducts([]); // Fallback to empty array on error
         } finally {
             setLoading(false);
         }
