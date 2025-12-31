@@ -15,7 +15,9 @@ const CategoryStrip = ({ activeCategory, onCategoryChange }) => {
             setLoading(true);
             const dbCategories = await productsAPI.getCategories();
             // Always include 'All' as the first option, then add unique DB categories
-            setCategories(['All', ...dbCategories]);
+            // Ensure dbCategories is an array before spreading
+            const categoryList = Array.isArray(dbCategories) ? dbCategories : [];
+            setCategories(['All', ...categoryList]);
         } catch (error) {
             console.error('Error fetching categories:', error);
             // Fallback to just 'All' if there's an error
