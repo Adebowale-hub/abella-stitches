@@ -67,6 +67,23 @@ const corsOptions = {
     maxAge: 86400 // 24 hours
 };
 
+// Manual preflight handler - ensures OPTIONS requests always succeed on Vercel
+app.use((req, res, next) => {
+    const origin = req.headers.origin;
+    if (allowedOrigins.includes(origin)) {
+        res.setHeader('Access-Control-Allow-Origin', origin);
+    }
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Cookie');
+    res.setHeader('Access-Control-Expose-Headers', 'Set-Cookie');
+
+    if (req.method === 'OPTIONS') {
+        return res.status(200).end();
+    }
+    next();
+});
+
 app.use(cors(corsOptions));
 
 // Handle preflight requests explicitly
